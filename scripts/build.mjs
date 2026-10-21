@@ -32,7 +32,7 @@ out('loadout.svg', loadoutCard(cfg));
 out('now-running.svg', nowRunning(cfg));
 out('quest-header.svg', questHeader(cfg));
 cfg.projects.forEach((p) => out(`quest-${p.key}.svg`, questCard(cfg, p)));
-out('stats.svg', statsCard(stats));
+out('stats.svg', statsCard(stats, cfg));
 out('activity.svg', activityCard(stats));
 out('achievements.svg', achievementsCard(stats, cfg));
 out('save-point.svg', savePoint(cfg, stats));

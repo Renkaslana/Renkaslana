@@ -1,12 +1,12 @@
-# Keeps the profile alive: real stats every morning, and Lumi falls asleep at night.
-# Cron is UTC. 23:00 UTC = 06:00 WIB (wake up), 15:00 UTC = 22:00 WIB (sleep).
-# If you change "timezone"/"nightHours" in profile.config.json, shift these too.
+# Keeps the profile in sync: checks GitHub every hour, commits only when the
+# numbers changed or Lumi switches between day and night (build.mjs decides that
+# from the clock, so no timezone math is needed here). Off the top of the hour
+# because GitHub delays the crowded :00 slot by hours.
 name: lumen
 
 on:
   schedule:
-    - cron: '0 23 * * *'
-    - cron: '0 15 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
   push:
     branches: [main]

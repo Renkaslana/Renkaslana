@@ -1,7 +1,7 @@
 // Pulls real numbers from the GitHub GraphQL API → data/stats.json.
 //   GITHUB_TOKEN=... node scripts/stats.mjs
 // Uses only public data unless the token is a PAT with access to private contributions.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { levelFromXp } from './lib/telemetry.mjs';
 
 const root = new URL('../', import.meta.url);
@@ -24,6 +24,8 @@ async function gql(query, variables) {
 
 const base = await gql(`query($login:String!){ user(login:$login){
   createdAt
+  followers{ totalCount }
+  publicRepos: repositories(ownerAffiliations:OWNER, privacy:PUBLIC){ totalCount }
   contributionsCollection{ contributionYears
     totalCommitContributions totalPullRequestContributions totalIssueContributions totalPullRequestReviewContributions
     contributionCalendar{ totalContributions weeks{ firstDay contributionDays{ date contributionCount } } } }
@@ -87,8 +89,9 @@ const stats = {
     prsYear: cc.totalPullRequestContributions,
     issuesYear: cc.totalIssueContributions,
     reviewsYear: cc.totalPullRequestReviewContributions,
-    repos: u.repositories.totalCount,
+    repos: u.publicRepos.totalCount, // same number as the profile's Repositories tab (forks included)
     stars,
+    followers: u.followers.totalCount,
   },
   languages,
   streak: { current, longest },
@@ -97,6 +100,15 @@ const stats = {
   level: levelFromXp(xp),
 };
 
-mkdirSync(new URL('data/', root), { recursive: true });
-writeFileSync(new URL('data/stats.json', root), JSON.stringify(stats, null, 2) + '\n');
-console.log(`stats: LV ${stats.level} · ${allTime} lifetime contributions · ${stars} stars`);
+// Only touch the file when the numbers moved: the hourly workflow then commits
+// only real changes, and "UPDATED" on the card means the data actually changed.
+const file = new URL('data/stats.json', root);
+const strip = ({ generatedAt, ...rest }) => JSON.stringify(rest);
+const prev = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+if (prev && !prev.demo && strip(prev) === strip(stats)) {
+  console.log(`stats: unchanged since ${prev.generatedAt} (LV ${stats.level}, ${stats.totals.contributionsYear} contributions in the last year)`);
+} else {
+  mkdirSync(new URL('data/', root), { recursive: true });
+  writeFileSync(file, JSON.stringify(stats, null, 2) + '\n');
+  console.log(`stats: LV ${stats.level} · ${stats.totals.contributionsYear} contributions in the last year · ${allTime} lifetime`);
+}

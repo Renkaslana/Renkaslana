@@ -5,6 +5,12 @@ import { lumiTiny, tinyCss } from './pixel-lumi.mjs';
 
 const W = 1000;
 const fmt = (n) => Number(n || 0).toLocaleString('en-US');
+/** "21 OCT · 08:24 UTC+7" in the owner's timezone. */
+const stamp = (iso, cfg) => {
+  const tz = cfg.timezone || 'UTC';
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: tz }).formatToParts(new Date(iso)).map((x) => [x.type, x.value]));
+  return `${p.day} ${p.month.toUpperCase()} · ${p.hour}:${p.minute} ${cfg.tzLabel || tz}`;
+};
 
 // Level curve: XP needed to reach level L is 100·(L−1)². Shown openly in the README source.
 export const xpForLevel = (L) => 100 * (L - 1) ** 2;
@@ -17,7 +23,7 @@ function heading(t, { x, y, title, sub }) {
     t.text(sub, { x: x + tw + 25, y, size: 16, style: 'disp500', fill: C.muted });
 }
 
-export function statsCard(s) {
+export function statsCard(s, cfg = {}) {
   const t = new Typo('m');
   const h = 330;
   const into = s.xp - xpForLevel(s.level);
@@ -29,12 +35,12 @@ export function statsCard(s) {
 @keyframes grow{from{transform:scaleX(0)}}.grow{transform-box:fill-box;transform-origin:left;animation:grow 1.2s cubic-bezier(.2,.7,.2,1) both}`;
 
   const tiles = [
-    ['CONTRIBUTIONS', fmt(s.totals.contributionsYear), `this year`],
-    ['COMMITS', fmt(s.totals.commitsYear), 'this year'],
-    ['PULL REQUESTS', fmt(s.totals.prsYear), 'this year'],
+    ['CONTRIBUTIONS', fmt(s.totals.contributionsYear), 'last 12 months'],
+    ['COMMITS', fmt(s.totals.commitsYear), 'last 12 months'],
+    ['PULL REQUESTS', fmt(s.totals.prsYear), 'last 12 months'],
     ['STREAK', `${s.streak.current}d`, `best ${s.streak.longest}d`],
-    ['REPOSITORIES', fmt(s.totals.repos), 'public, owned'],
-    ['STARS', fmt(s.totals.stars), 'earned'],
+    ['REPOSITORIES', fmt(s.totals.repos), 'public'],
+    ['FOLLOWERS', fmt(s.totals.followers ?? 0), 'on GitHub'],
   ];
   const tileSvg = tiles.map(([k, v, sub], i) => {
     const x = 290 + (i % 3) * 142, y = 96 + Math.floor(i / 3) * 104;
@@ -58,7 +64,7 @@ ${t.text(sub, { x: x + 14, y: y + 78, size: 11, fill: C.muted })}</g>`;
   const legend = langs.map((l, i) => `<circle cx="742" cy="${170 + i * 26}" r="5" fill="${l.color || C.cyan}"/>${t.text(l.name, { x: 756, y: 175 + i * 26, size: 14, style: 'disp500', fill: C.text })}${t.text(`${(l.pct * 100).toFixed(1)}%`, { x: 964, y: 175 + i * 26, size: 12, style: 'mono500', fill: C.muted, anchor: 'end' })}`).join('');
 
   const body = `
-${frame(t, { w: W, h, title: 'sys.monitor', tag: s.demo ? 'DEMO DATA · RUN THE WORKFLOW' : `SYNCED ${s.generatedAt.slice(0, 10)}`, tagColor: s.demo ? C.amber : C.muted, gridId: 'mgrid' })}
+${frame(t, { w: W, h, title: 'sys.monitor', tag: s.demo ? 'DEMO DATA · RUN THE WORKFLOW' : `UPDATED ${stamp(s.generatedAt, cfg)}`, tagColor: s.demo ? C.amber : C.muted, gridId: 'mgrid' })}
 ${heading(t, { x: 40, y: 92, title: 'STATS', sub: 'live telemetry' })}
 <g transform="translate(140 206)">
   <circle r="${R + 14}" fill="${C.amber}" fill-opacity=".05"/>
@@ -76,7 +82,7 @@ ${legend}`;
   return svgDoc({
     w: W, h,
     title: `GitHub stats — level ${s.level}`,
-    desc: `Level ${s.level}. ${s.totals.contributionsYear} contributions, ${s.totals.commitsYear} commits and ${s.totals.prsYear} pull requests this year. Current streak ${s.streak.current} days. Top languages: ${langs.map((l) => l.name).join(', ')}.`,
+    desc: `Level ${s.level}. ${s.totals.contributionsYear} contributions, ${s.totals.commitsYear} commits and ${s.totals.prsYear} pull requests in the last 12 months. Current streak ${s.streak.current} days. Top languages: ${langs.map((l) => l.name).join(', ')}.`,
     css, defs: gridPattern('mgrid', 28), body, typo: t,
   });
 }
@@ -201,7 +207,7 @@ export function demoStats() {
     demo: true,
     generatedAt: new Date().toISOString(),
     playtime: '3y 4m',
-    totals: { contributionsAllTime: 1120, contributionsYear: 412, commitsYear: 356, prsYear: 18, repos: 21, stars: 14 },
+    totals: { contributionsAllTime: 1120, contributionsYear: 412, commitsYear: 356, prsYear: 18, repos: 21, stars: 14, followers: 8 },
     languages: [
       { name: 'TypeScript', color: '#3178C6', pct: 0.41 },
       { name: 'Python', color: '#3572A5', pct: 0.29 },
