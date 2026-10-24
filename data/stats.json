@@ -1,6 +1,6 @@
 {
   "demo": false,
-  "generatedAt": "2026-10-23T07:36:28.179Z",
+  "generatedAt": "2026-10-24T00:48:06.736Z",
   "login": "Renkaslana",
   "playtime": "2y 1m",
   "totals": {
@@ -92,7 +92,7 @@
     }
   ],
   "streak": {
-    "current": 5,
+    "current": 0,
     "longest": 8
   },
   "weeks": [
