@@ -1,6 +1,6 @@
 {
   "demo": false,
-  "generatedAt": "2026-10-24T00:48:06.736Z",
+  "generatedAt": "2026-10-25T04:48:40.040Z",
   "login": "Renkaslana",
   "playtime": "2y 1m",
   "totals": {
@@ -96,10 +96,6 @@
     "longest": 8
   },
   "weeks": [
-    {
-      "start": "2025-10-19",
-      "count": 11
-    },
     {
       "start": "2025-10-26",
       "count": 0
@@ -307,6 +303,10 @@
     {
       "start": "2026-10-18",
       "count": 50
+    },
+    {
+      "start": "2026-10-25",
+      "count": 0
     }
   ],
   "xp": 5260,
