@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/secret.svg" width="100%" alt="404 — quest not found. Achievement unlocked: Curious Cat.">
+<img src="https://raw.githubusercontent.com/Renkaslana/Renkaslana/output/assets/secret.svg" width="100%" alt="404 — quest not found. Achievement unlocked: Curious Cat.">
 
 </div>
 

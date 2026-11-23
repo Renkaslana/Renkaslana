@@ -20,7 +20,7 @@
 <div class="box"><article class="markdown-body" id="md"></article></div>
 <script>
   fetch('../../README.md?' + Date.now()).then(r => r.text()).then(src => {
-    const html = marked.parse(src).replace(/src="assets\//g, 'src="../../assets/').replace(/href="SECRET.md"/g, 'href="../../SECRET.md"');
+    const html = marked.parse(src).replace(/src="https:\/\/raw\.githubusercontent\.com\/[^"]*?\/output\/assets\//g, 'src="../../assets/').replace(/href="SECRET.md"/g, 'href="../../SECRET.md"');
     document.getElementById('md').innerHTML = html;
   });
   document.getElementById('theme').onclick = () => {

@@ -1,3 +1,6 @@
 scripts/dev/out/
 node_modules/
 .claude/
+# generated — published to the `output` branch by the workflow
+assets/
+data/

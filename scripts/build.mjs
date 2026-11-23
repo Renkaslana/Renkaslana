@@ -47,8 +47,10 @@ out('secret.svg', secretCard());
 
 // ---------- README ----------
 const gh = `https://github.com/${cfg.username}`;
-const img = (src, alt, extra = '') => `<img src="assets/${src}" width="100%" alt="${alt.replace(/"/g, '&quot;')}"${extra}>`;
-const pair = (a, b) => `<p align="center">\n${[a, b].filter(Boolean).map((p) => `  <a href="${gh}/${p.repo}"><img src="assets/quest-${p.key}.svg" width="49%" alt="${p.quest}: ${p.title} — ${p.summary}"></a>`).join('\n')}\n</p>`;
+// Images live on the `output` branch (rewritten by the workflow) so bot updates never add commits to main.
+const A = `https://raw.githubusercontent.com/${cfg.username}/${cfg.username}/output/assets/`;
+const img = (src, alt, extra = '') => `<img src="${A}${src}" width="100%" alt="${alt.replace(/"/g, '&quot;')}"${extra}>`;
+const pair = (a, b) => `<p align="center">\n${[a, b].filter(Boolean).map((p) => `  <a href="${gh}/${p.repo}"><img src="${A}quest-${p.key}.svg" width="49%" alt="${p.quest}: ${p.title} — ${p.summary}"></a>`).join('\n')}\n</p>`;
 const projects = cfg.projects;
 const rows = [];
 for (let i = 0; i < projects.length; i += 2) rows.push(pair(projects[i], projects[i + 1]));
@@ -75,7 +77,7 @@ const readme = `<!--
 </div>
 
 <p align="center">
-${DOCK.map((d) => `  <a href="#${d.key}"><img src="assets/dock-${d.key}.svg" width="18.6%" alt="${d.label}"></a>`).join('\n')}
+${DOCK.map((d) => `  <a href="#${d.key}"><img src="${A}dock-${d.key}.svg" width="18.6%" alt="${d.label}"></a>`).join('\n')}
 </p>
 
 <p align="center">
@@ -112,10 +114,10 @@ ${img('achievements.svg', 'Achievements unlocked from real GitHub data')}
 ${img('save-point.svg', 'Save point — contact')}
 
 <p align="center">
-${CONTACTS.map((c) => `  <a href="${c.href(cfg.links[c.key])}"><img src="assets/btn-${c.key}.svg" width="${CONTACTS.length > 2 ? 32 : 49}%" alt="${c.label} — ${c.sub}"></a>`).join('\n')}
+${CONTACTS.map((c) => `  <a href="${c.href(cfg.links[c.key])}"><img src="${A}btn-${c.key}.svg" width="${CONTACTS.length > 2 ? 32 : 49}%" alt="${c.label} — ${c.sub}"></a>`).join('\n')}
 </p>
 
-<a href="SECRET.md"><img src="assets/footer.svg" width="100%" alt="End of transmission" title="…is someone peeking?"></a>
+<a href="SECRET.md"><img src="${A}footer.svg" width="100%" alt="End of transmission" title="…is someone peeking?"></a>
 
 <details>
 <summary><code>$ open terminal</code></summary>
@@ -152,7 +154,7 @@ writeFileSync(new URL('README.md', root), readme);
 // ---------- SECRET.md (the peeking Lumi links here) ----------
 writeFileSync(new URL('SECRET.md', root), `<div align="center">
 
-<img src="assets/secret.svg" width="100%" alt="404 — quest not found. Achievement unlocked: Curious Cat.">
+<img src="${A}secret.svg" width="100%" alt="404 — quest not found. Achievement unlocked: Curious Cat.">
 
 </div>
 

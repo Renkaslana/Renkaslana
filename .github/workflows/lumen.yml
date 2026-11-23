@@ -1,7 +1,8 @@
-# Keeps the profile in sync: checks GitHub every hour, commits only when the
-# numbers changed or Lumi switches between day and night (build.mjs decides that
-# from the clock, so no timezone math is needed here). Off the top of the hour
-# because GitHub delays the crowded :00 slot by hours.
+# Keeps the profile in sync. Checks GitHub every hour; build.mjs picks day or
+# night from the clock. Generated files (assets/, data/) are published to the
+# `output` branch as ONE force-pushed commit, so bot updates never pile up in
+# main's history. The README on main loads its images from that branch.
+# Runs off the top of the hour because GitHub delays the crowded :00 slot.
 name: lumen
 
 on:
@@ -29,6 +30,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Restore last published data
+        # stats.mjs compares against it, so "UPDATED" only moves when numbers change
+        run: |
+          git fetch --depth=1 origin output 2>/dev/null && git checkout FETCH_HEAD -- data 2>/dev/null || echo "no previous output yet"
+
       - name: Fetch stats
         # Optional secret GH_STATS_TOKEN (a PAT) also counts private contributions.
         run: node scripts/stats.mjs
@@ -39,9 +45,26 @@ jobs:
       - name: Render assets + README
         run: node scripts/build.mjs
 
-      - name: Commit
+      - name: Publish assets to the output branch
+        run: |
+          rm -rf /tmp/out && mkdir -p /tmp/out && cp -r assets data /tmp/out/
+          cd /tmp/out
+          git init -q -b output
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "lumen: generated assets"
+          prev=$(git ls-remote "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" output | cut -f1)
+          # skip the push when nothing changed (same tree as what's published)
+          if [ -n "$prev" ]; then
+            git fetch -q --depth=1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" output
+            if git diff --quiet FETCH_HEAD HEAD; then echo "output unchanged"; exit 0; fi
+          fi
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" output
+
+      - name: Commit README to main (only when its text changed)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets data README.md SECRET.md
-          git diff --cached --quiet || (git commit -m "chore(lumen): refresh profile assets" && git push)
+          git add README.md SECRET.md
+          git diff --cached --quiet || (git commit -m "chore(lumen): update README" && git push)
