@@ -33,7 +33,7 @@ jobs:
       - name: Restore last published data
         # stats.mjs compares against it, so "UPDATED" only moves when numbers change
         run: |
-          git fetch --depth=1 origin output 2>/dev/null && git checkout FETCH_HEAD -- data 2>/dev/null || echo "no previous output yet"
+          git fetch --depth=1 origin output 2>/dev/null && git restore --source=FETCH_HEAD --worktree -- data 2>/dev/null || echo "no previous output yet"
 
       - name: Fetch stats
         # Optional secret GH_STATS_TOKEN (a PAT) also counts private contributions.
