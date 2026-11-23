@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['profile.config.json', 'scripts/**']
+    paths: ['profile.config.json', 'scripts/**', '.github/workflows/**']
 
 permissions:
   contents: write
